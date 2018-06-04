@@ -1,29 +1,30 @@
-import os
-import platform
+from p2pool.bitcoin import networks
 
-from twisted.internet import defer
+# CHAIN_LENGTH = number of shares back client keeps
+# REAL_CHAIN_LENGTH = maximum number of shares back client uses to compute payout
+# REAL_CHAIN_LENGTH must always be <= CHAIN_LENGTH
+# REAL_CHAIN_LENGTH must be changed in sync with all other clients
+# changes can be done by changing one, then the other
 
-from .. import data, helper
-from p2pool.util import pack
-
-
-#P2P_PREFIX = 'f9beb4d9'.decode('hex') # disk magic and old net magic
-P2P_PREFIX = 'e4e8e9e5'.decode('hex') # new net magic
-P2P_PORT = 5556
-ADDRESS_VERSION = 0
-RPC_PORT = 6666
-RPC_CHECK = defer.inlineCallbacks(lambda bitcoind: defer.returnValue(
-            
-            (yield bitcoind.rpc_getblockchaininfo())['chain'] == 'main'
-        ))
-SUBSIDY_FUNC = lambda height: 50*100000000 >> (height + 1)//210000
-POW_FUNC = data.hash256
-BLOCK_PERIOD = 600 # s
-SYMBOL = 'DEM'
-CONF_FILE_FUNC = lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'Bitcoin') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/Bitcoin/') if platform.system() == 'Darwin' else os.path.expanduser('~/.eMark'), 'eMark.conf')
-BLOCK_EXPLORER_URL_PREFIX = 'http://185.194.142.165:3001/block/'
-ADDRESS_EXPLORER_URL_PREFIX = 'http://185.194.142.165:3001/ext/getaddress/'
-TX_EXPLORER_URL_PREFIX = 'http://185.194.142.165:3001/tx/'
-SANE_TARGET_RANGE = (2**256//2**32//1000000 - 1, 2**256//2**32 - 1)
-DUMB_SCRYPT_DIFF = 1
-DUST_THRESHOLD = 0.001e8
+PARENT = networks.nets['bitcoincash']
+SHARE_PERIOD = 60 # seconds -- one minute
+CHAIN_LENGTH = 3*24*60 # shares -- three days
+REAL_CHAIN_LENGTH = 3*24*60 # shares -- three days
+TARGET_LOOKBEHIND = 200 # shares
+SPREAD = 3 # blocks
+IDENTIFIER = 'b826c0a51ddc2d2b'.decode('hex')
+PREFIX = 'ac9a8fda9a911bce'.decode('hex')
+P2P_PORT = 9349
+MIN_TARGET = 0
+MAX_TARGET = 2**256//2**32 - 1
+PERSIST = True # Set to False for solo mining or starting a new chain
+WORKER_PORT = 9348
+BOOTSTRAP_ADDRS = 'ml.toom.im woff.toom.im crypto.office-on-the.net siberia.mine.nu'.split(' ') # fixme, need more seed nodes
+ANNOUNCE_CHANNEL = '#p2pool'
+VERSION_CHECK = lambda v: None if 100000 <= v else 'Bitcoin version too old. Upgrade to 0.11.2 or newer!' # not a bug. BIP65 support is ensured by SOFTFORKS_REQUIRED
+VERSION_WARNING = lambda v: None
+SOFTFORKS_REQUIRED = set(['bip65', 'csv'])
+MINIMUM_PROTOCOL_VERSION = 3301
+NEW_MINIMUM_PROTOCOL_VERSION = 3301
+BLOCK_MAX_SIZE = 8000000
+BLOCK_MAX_WEIGHT = 32000000
