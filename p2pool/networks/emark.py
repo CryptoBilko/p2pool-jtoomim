@@ -6,7 +6,7 @@ from p2pool.bitcoin import networks
 # REAL_CHAIN_LENGTH must be changed in sync with all other clients
 # changes can be done by changing one, then the other
 
-PARENT = networks.nets['bitcoincash']
+PARENT = networks.nets['emark']
 SHARE_PERIOD = 60 # seconds -- one minute
 CHAIN_LENGTH = 3*24*60 # shares -- three days
 REAL_CHAIN_LENGTH = 3*24*60 # shares -- three days
